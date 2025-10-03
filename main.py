@@ -5,8 +5,9 @@ from google import genai
 from google.genai import types
 from functions.get_files_info import schema_get_files_info
 from functions.get_file_content import schema_get_file_content
-from functions.run_python_file import schema_get_files_info as schema_run_python_file
-from functions.write_file import schema_get_file_content as schema_write_file
+from functions.run_python import schema_run_python
+from functions.write_file_content import schema_write_file_content
+from call_function import call_function
 
 
 def main():
@@ -37,8 +38,8 @@ All paths you provide should be relative to the working directory. You do not ne
         function_declarations=[
             schema_get_files_info,
             schema_get_file_content,
-            schema_run_python_file,
-            schema_write_file,
+            schema_run_python,
+            schema_write_file_content,
         ],
     )
 
@@ -54,11 +55,18 @@ All paths you provide should be relative to the working directory. You do not ne
             print(f"User prompt: {sys.argv[1]}")
             print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
             print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
-        elif response.function_calls:
+        if response.function_calls:
             for function_call_part in response.function_calls:
-                print(
-                    f"Calling function: {function_call_part.name}({function_call_part.args})"
-                )
+                function_call_result = call_function(function_call_part, verbose=True)
+                parts = getattr(function_call_result, "parts", None)
+                if not parts or not getattr(parts[0], "function_response", None):
+                    raise RuntimeError("Missing function response from call_function()")
+
+                resp = parts[0].function_response.response
+                if not resp:
+                    raise RuntimeError("Empty function response from call_function()")
+                if len(sys.argv) >= 3 and sys.argv[2] == "--verbose":
+                    print(f"-> {resp}")
         else:
             print(response.text)
     except Exception as e:
