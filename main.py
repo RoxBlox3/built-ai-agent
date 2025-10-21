@@ -43,14 +43,23 @@ All paths you provide should be relative to the working directory. You do not ne
         ],
     )
 
+    user_message = types.Content(
+        role="user",
+        parts=[types.Part(text=sys.argv[1])],
+    )
+
+    messages = [user_message]
+
     try:
         response = client.models.generate_content(
             model="gemini-2.0-flash-001",
-            contents=sys.argv[1],
+            contents=messages,
             config=types.GenerateContentConfig(
                 tools=[available_functions], system_instruction=system_prompt
             ),
         )
+        for candidate in response.candidates:
+            messages.append(candidate.content)
         if len(sys.argv) >= 3 and sys.argv[2] == "--verbose":
             print(f"User prompt: {sys.argv[1]}")
             print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
