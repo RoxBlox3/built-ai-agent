@@ -60,6 +60,9 @@ All paths you provide should be relative to the working directory. You do not ne
         )
         for candidate in response.candidates:
             messages.append(candidate.content)
+            if response.text:
+                print(response.text)
+                break
         if len(sys.argv) >= 3 and sys.argv[2] == "--verbose":
             print(f"User prompt: {sys.argv[1]}")
             print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
