@@ -15,7 +15,7 @@ def write_file(working_directory, file_path, content):
     if os.path.exists(abs_file_path) and os.path.isdir(abs_file_path):
         return f'Error: "{file_path}" is a directory, not a file'
     try:
-        with open(abs_file_path, "w") as f:bootdev run ad0f349e-4426-4658-b3f5-7e7bbce2ae48
+        with open(abs_file_path, "w") as f:
             f.write(content)
         return (
             f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
